@@ -1,0 +1,30 @@
+{
+  "productName": "FCM Example",
+  "version": "0.1.0",
+  "identifier": "com.mori.fcmplugin",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "frontendDist": "../dist",
+    "index": "basic.html"
+  },
+  "app": {
+    "windows": [
+      {
+        "fullscreen": false,
+        "resizable": true,
+        "title": "FCM Example",
+        "width": 800,
+        "height": 600
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "plugins": {
+    "fcm": {
+      "timeout": 3000
+    }
+  }
+}

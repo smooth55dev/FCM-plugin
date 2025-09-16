@@ -1,0 +1,48 @@
+<html>
+<head>
+    <title>Basic Test</title>
+</head>
+<body style="font-family: Arial; padding: 20px; background: white;">
+    <h1 style="color: #333;">🔥 Basic FCM Test</h1>
+    
+    <div style="background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 5px;">
+        <p><strong>Status:</strong> <span id="status">Loading...</span></p>
+        <p><strong>Context:</strong> <span id="context">Detecting...</span></p>
+    </div>
+    
+    <button onclick="testClick()" style="background: #2196f3; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Test Click</button>
+    
+    <div id="output" style="background: #f5f5f5; padding: 10px; margin-top: 20px; font-family: monospace; font-size: 12px;">
+        <div>App started...</div>
+    </div>
+
+    <script>
+        function log(msg) {
+            var output = document.getElementById('output');
+            var div = document.createElement('div');
+            div.innerHTML = new Date().toLocaleTimeString() + ': ' + msg;
+            output.appendChild(div);
+        }
+
+        function testClick() {
+            log('Button clicked - SUCCESS!');
+            document.getElementById('status').innerHTML = 'Working!';
+        }
+
+        // Check Tauri
+        if (typeof window.__TAURI__ !== 'undefined') {
+            document.getElementById('context').innerHTML = 'Tauri App';
+            document.getElementById('context').style.color = 'green';
+            log('Tauri API detected');
+        } else {
+            document.getElementById('context').innerHTML = 'Browser';
+            document.getElementById('context').style.color = 'orange';
+            log('Running in browser mode');
+        }
+
+        // Initialize
+        document.getElementById('status').innerHTML = 'Loaded!';
+        log('Page initialized');
+    </script>
+</body>
+</html>

@@ -1,323 +1,372 @@
-# FCM Plugin for Android
+# Tauri FCM Plugin
 
-A comprehensive Firebase Cloud Messaging (FCM) plugin for Android applications that provides easy-to-use functionality for push notifications, topic subscriptions, and token management.
+A comprehensive Firebase Cloud Messaging (FCM) plugin for Tauri applications, providing push notification capabilities for both Android and iOS platforms.
 
 ## Features
 
-- ✅ **Token Management**: Get, refresh, and delete FCM tokens
-- ✅ **Topic Subscriptions**: Subscribe and unsubscribe from FCM topics
-- ✅ **Message Handling**: Handle both foreground and background messages
-- ✅ **Notification Display**: Automatic notification display with custom styling
-- ✅ **Permission Handling**: Automatic notification permission requests for Android 13+
-- ✅ **Coroutine Support**: Built with Kotlin coroutines for async operations
-- ✅ **Singleton Pattern**: Easy-to-use singleton implementation
+- 🔥 **Firebase Cloud Messaging Integration**: Full FCM support for Android and iOS
+- 📱 **Cross-Platform**: Works on both Android and iOS
+- 🎯 **Topic Management**: Subscribe and unsubscribe from FCM topics
+- 🔐 **Permission Handling**: Built-in notification permission management
+- 📨 **Message Handling**: Receive and process push notifications
+- 🎧 **Event System**: Real-time events for token changes, messages, and errors
+- 🛡️ **Type Safety**: Full TypeScript support with comprehensive type definitions
 
-## Project Structure
+## Installation
 
+### 1. Add the Plugin to Your Tauri Project
+
+Add the plugin to your `Cargo.toml`:
+
+```toml
+[dependencies]
+tauri-plugin-fcm = { path = "../tauri-plugin-fcm" }
 ```
-app/src/main/java/com/mori/fcmplugin/
-├── FCMPlugin.kt          # Main plugin class with all FCM functionality
-├── FCMService.kt         # Firebase messaging service for handling messages
-├── FCMApplication.kt     # Application class for initialization
-└── MainActivity.kt       # Demo activity showing plugin usage
+
+### 2. Initialize the Plugin
+
+In your `src-tauri/src/main.rs`:
+
+```rust
+use tauri_plugin_fcm::Fcm;
+
+fn main() {
+    tauri::Builder::default()
+        .plugin(Fcm::init())
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
 ```
 
-## Setup Instructions
+### 3. Android Setup
 
-### 1. Firebase Configuration
+#### Add Firebase to Your Android Project
 
-1. Create a new Firebase project at [Firebase Console](https://console.firebase.google.com/)
-2. Add your Android app to the project
-3. Download the `google-services.json` file and place it in `app/src/main/`
-4. Enable Cloud Messaging in the Firebase Console
-
-### 2. Dependencies
-
-The project already includes all necessary dependencies in `app/build.gradle`:
+1. Add the Google Services plugin to your `android/build.gradle`:
 
 ```gradle
-// Firebase
-implementation platform('com.google.firebase:firebase-bom:32.3.1')
-implementation 'com.google.firebase:firebase-messaging-ktx'
-implementation 'com.google.firebase:firebase-analytics-ktx'
-
-// Coroutines
-implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+buildscript {
+    dependencies {
+        classpath 'com.google.gms:google-services:4.3.15'
+    }
+}
 ```
 
-### 3. Permissions
+2. Apply the plugin in your `android/app/build.gradle`:
 
-The `AndroidManifest.xml` includes all necessary permissions:
+```gradle
+apply plugin: 'com.google.gms.google-services'
+```
+
+3. Add Firebase dependencies:
+
+```gradle
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:32.7.0')
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-analytics'
+}
+```
+
+4. Add the `google-services.json` file to your `android/app/` directory.
+
+#### Update AndroidManifest.xml
+
+Add the required permissions and service:
 
 ```xml
 <uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 <uses-permission android:name="android.permission.WAKE_LOCK" />
-<uses-permission android:name="android.permission.VIBRATE" />
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+<application>
+    <service
+        android:name="app.tauri.plugin.fcm.FcmService"
+        android:exported="false">
+        <intent-filter>
+            <action android:name="com.google.firebase.MESSAGING_EVENT" />
+        </intent-filter>
+    </service>
+</application>
 ```
 
-## Usage Guide
+### 4. iOS Setup
 
-### 1. Basic Initialization
+#### Add Firebase to Your iOS Project
 
-```kotlin
-// In your Application class
-class MyApplication : Application() {
-    private lateinit var fcmPlugin: FCMPlugin
-    
-    override fun onCreate() {
-        super.onCreate()
-        
-        // Initialize FCM Plugin
-        fcmPlugin = FCMPlugin.getInstance(this)
-        
-        // Setup callbacks
-        setupFCMCallbacks()
-        
-        // Get initial token
-        initializeFCM()
-    }
-    
-    private fun setupFCMCallbacks() {
-        fcmPlugin.setTokenCallback { token ->
-            // Handle token updates
-            sendTokenToServer(token)
-        }
-        
-        fcmPlugin.setMessageCallback { message ->
-            // Handle foreground messages
-            handleMessage(message)
-        }
-    }
-    
-    private fun initializeFCM() {
-        lifecycleScope.launch {
-            try {
-                val token = fcmPlugin.getToken()
-                sendTokenToServer(token)
-            } catch (e: Exception) {
-                Log.e("FCM", "Failed to get token", e)
-            }
-        }
-    }
-}
+1. Add Firebase dependencies to your `ios/Package.swift`:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "10.0.0")
+]
 ```
 
-### 2. Getting FCM Token
+2. Add the `GoogleService-Info.plist` file to your iOS project.
 
-```kotlin
-// Get current FCM token
-lifecycleScope.launch {
-    try {
-        val token = fcmPlugin.getToken()
-        Log.d("FCM", "Token: $token")
-        // Send token to your server
-    } catch (e: Exception) {
-        Log.e("FCM", "Failed to get token", e)
-    }
-}
-```
+3. Initialize Firebase in your iOS app delegate.
 
-### 3. Topic Subscriptions
+## Usage
 
-```kotlin
+### JavaScript/TypeScript
+
+```typescript
+import { createFcm } from '@tauri-apps/plugin-fcm';
+
+const fcm = createFcm();
+
+// Get FCM token
+const token = await fcm.getToken();
+console.log('FCM Token:', token);
+
 // Subscribe to a topic
-lifecycleScope.launch {
-    try {
-        val success = fcmPlugin.subscribeToTopic("news")
-        if (success) {
-            Log.d("FCM", "Subscribed to news topic")
-        }
-    } catch (e: Exception) {
-        Log.e("FCM", "Failed to subscribe", e)
-    }
-}
+await fcm.subscribeToTopic('news');
 
 // Unsubscribe from a topic
-lifecycleScope.launch {
-    try {
-        val success = fcmPlugin.unsubscribeFromTopic("news")
-        if (success) {
-            Log.d("FCM", "Unsubscribed from news topic")
-        }
-    } catch (e: Exception) {
-        Log.e("FCM", "Failed to unsubscribe", e)
-    }
-}
-```
+await fcm.unsubscribeFromTopic('news');
 
-### 4. Handling Messages
+// Check notification permissions
+const enabled = await fcm.areNotificationsEnabled();
+console.log('Notifications enabled:', enabled);
 
-```kotlin
-// Set up message callback in your Application class
-fcmPlugin.setMessageCallback { message ->
-    // Handle the message
-    val title = message.notification?.title
-    val body = message.notification?.body
-    val data = message.data
-    
-    Log.d("FCM", "Received message: $title - $body")
-    Log.d("FCM", "Data: $data")
-    
-    // Custom handling logic here
-}
-```
+// Request notification permission
+const granted = await fcm.requestNotificationPermission();
+console.log('Permission granted:', granted);
 
-### 5. Showing Custom Notifications
-
-```kotlin
-// Show a custom notification
-fcmPlugin.showNotification(
-    title = "Custom Title",
-    body = "Custom message body",
-    data = mapOf(
-        "key1" to "value1",
-        "key2" to "value2"
-    )
-)
-```
-
-### 6. Token Management
-
-```kotlin
 // Delete FCM token
-lifecycleScope.launch {
-    try {
-        val success = fcmPlugin.deleteToken()
-        if (success) {
-            Log.d("FCM", "Token deleted successfully")
-        }
-    } catch (e: Exception) {
-        Log.e("FCM", "Failed to delete token", e)
-    }
-}
+await fcm.deleteToken();
 
-// Enable/disable auto initialization
-fcmPlugin.setAutoInitEnabled(false) // Disable auto init
-fcmPlugin.setAutoInitEnabled(true)  // Enable auto init
+// Get last received message
+const lastMessage = await fcm.getLastMessage();
+console.log('Last message:', lastMessage);
 ```
 
-### 7. Notification Management
+### Event Listeners
 
-```kotlin
-// Clear all notifications
-fcmPlugin.clearAllNotifications()
+```typescript
+// Listen for token received events
+const tokenListener = await fcm.onTokenReceived((event) => {
+    console.log('Token received:', event.token);
+    console.log('Timestamp:', event.timestamp);
+});
+
+// Listen for message received events
+const messageListener = await fcm.onMessageReceived((message) => {
+    console.log('Message received:', message);
+    console.log('Title:', message.notification?.title);
+    console.log('Body:', message.notification?.body);
+    console.log('Data:', message.data);
+});
+
+// Listen for topic change events
+const topicListener = await fcm.onTopicChanged((event) => {
+    console.log(`Topic ${event.topic} ${event.action}`);
+});
+
+// Listen for token refresh events
+const refreshListener = await fcm.onTokenRefresh((event) => {
+    console.log('Token refreshed:', event.token);
+});
+
+// Listen for errors
+const errorListener = await fcm.onTokenError((event) => {
+    console.error('FCM Error:', event.error);
+});
+
+// Clean up listeners
+tokenListener.unlisten();
+messageListener.unlisten();
+topicListener.unlisten();
+refreshListener.unlisten();
+errorListener.unlisten();
+```
+
+### Rust
+
+```rust
+use tauri_plugin_fcm::Fcm;
+
+// Get FCM instance
+let fcm = Fcm::new(handle);
+
+// Get token
+let token = fcm.get_token()?;
+println!("FCM Token: {}", token);
+
+// Subscribe to topic
+fcm.subscribe_to_topic("news".to_string())?;
+
+// Unsubscribe from topic
+fcm.unsubscribe_from_topic("news".to_string())?;
+
+// Check notifications
+let enabled = fcm.are_notifications_enabled()?;
+println!("Notifications enabled: {}", enabled);
+
+// Request permission
+let granted = fcm.request_notification_permission()?;
+println!("Permission granted: {}", granted);
+
+// Delete token
+fcm.delete_token()?;
+
+// Get last message
+let last_message = fcm.get_last_message()?;
+println!("Last message: {:?}", last_message);
 ```
 
 ## API Reference
 
-### FCMPlugin Class
+### Methods
 
-#### Methods
+#### `getToken(): Promise<string>`
+Gets the current FCM registration token.
 
-| Method | Description | Return Type |
-|--------|-------------|-------------|
-| `getInstance(context)` | Get singleton instance | `FCMPlugin` |
-| `getToken()` | Get current FCM token | `suspend String` |
-| `subscribeToTopic(topic)` | Subscribe to a topic | `suspend Boolean` |
-| `unsubscribeFromTopic(topic)` | Unsubscribe from a topic | `suspend Boolean` |
-| `setTokenCallback(callback)` | Set token update callback | `Unit` |
-| `setMessageCallback(callback)` | Set message received callback | `Unit` |
-| `showNotification(title, body, data)` | Show custom notification | `Unit` |
-| `clearAllNotifications()` | Clear all notifications | `Unit` |
-| `setAutoInitEnabled(enabled)` | Enable/disable auto initialization | `Unit` |
-| `deleteToken()` | Delete FCM token | `suspend Boolean` |
+#### `subscribeToTopic(topic: string): Promise<void>`
+Subscribes to an FCM topic.
 
-#### Callbacks
+#### `unsubscribeFromTopic(topic: string): Promise<void>`
+Unsubscribes from an FCM topic.
 
-```kotlin
-// Token callback
-fcmPlugin.setTokenCallback { token: String ->
-    // Handle token updates
+#### `areNotificationsEnabled(): Promise<boolean>`
+Checks if notifications are enabled on the device.
+
+#### `requestNotificationPermission(): Promise<boolean>`
+Requests notification permission from the user.
+
+#### `deleteToken(): Promise<void>`
+Deletes the current FCM token.
+
+#### `getLastMessage(): Promise<FcmMessage | null>`
+Gets the last received FCM message.
+
+### Events
+
+#### `tokenReceived`
+Fired when a new FCM token is received.
+
+```typescript
+{
+  token: string;
+  timestamp: number;
 }
+```
 
-// Message callback
-fcmPlugin.setMessageCallback { message: RemoteMessage ->
-    // Handle received messages
+#### `tokenRefresh`
+Fired when the FCM token is refreshed.
+
+```typescript
+{
+  token: string;
+  timestamp: number;
 }
 ```
 
-## Testing the Plugin
+#### `messageReceived`
+Fired when a new FCM message is received.
 
-The project includes a demo `MainActivity` that demonstrates all plugin features:
-
-1. **Get FCM Token**: Retrieves and displays the current FCM token
-2. **Topic Subscriptions**: Subscribe/unsubscribe from "news" and "sports" topics
-3. **Test Notification**: Send a test notification
-4. **Clear Notifications**: Clear all notifications
-5. **Delete Token**: Delete the current FCM token
-
-## Sending Test Messages
-
-### Using Firebase Console
-
-1. Go to Firebase Console → Cloud Messaging
-2. Click "Send your first message"
-3. Enter notification title and text
-4. Select your app as the target
-5. Click "Send test message" and enter your FCM token
-
-### Using cURL
-
-```bash
-curl -X POST https://fcm.googleapis.com/fcm/send \
-  -H "Authorization: key=YOUR_SERVER_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "to": "YOUR_FCM_TOKEN",
-    "notification": {
-      "title": "Test Title",
-      "body": "Test message body"
-    },
-    "data": {
-      "key1": "value1",
-      "key2": "value2"
-    }
-  }'
+```typescript
+{
+  messageId?: string;
+  from?: string;
+  to?: string;
+  messageType?: string;
+  sentTime?: number;
+  ttl?: number;
+  notification?: {
+    title?: string;
+    body?: string;
+    icon?: string;
+    color?: string;
+    sound?: string;
+    tag?: string;
+    clickAction?: string;
+  };
+  data?: Record<string, string>;
+}
 ```
 
-### Sending to Topics
+#### `topicChanged`
+Fired when topic subscription status changes.
 
-```bash
-curl -X POST https://fcm.googleapis.com/fcm/send \
-  -H "Authorization: key=YOUR_SERVER_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "to": "/topics/news",
-    "notification": {
-      "title": "News Update",
-      "body": "Breaking news alert!"
-    }
-  }'
+```typescript
+{
+  topic: string;
+  action: 'subscribed' | 'unsubscribed';
+}
 ```
+
+#### `tokenDeleted`
+Fired when the FCM token is deleted.
+
+```typescript
+{
+  action: string;
+}
+```
+
+#### `tokenError`
+Fired when an FCM error occurs.
+
+```typescript
+{
+  error: string;
+}
+```
+
+## Permissions
+
+The plugin automatically handles the following permissions:
+
+- `POST_NOTIFICATIONS` - Required for push notifications
+- `INTERNET` - Required for FCM communication
+- `WAKE_LOCK` - Required for background message processing
+
+## Configuration
+
+### Android
+
+The plugin uses the standard Firebase configuration through `google-services.json`.
+
+### iOS
+
+The plugin uses the standard Firebase configuration through `GoogleService-Info.plist`.
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Token not generated**: Ensure `google-services.json` is properly placed and Firebase is initialized
-2. **Notifications not showing**: Check notification permissions for Android 13+
-3. **Messages not received**: Verify FCM service is properly registered in manifest
-4. **Build errors**: Ensure all dependencies are properly added and Google Services plugin is applied
+1. **Token not received**: Ensure Firebase is properly configured and the app has internet connectivity.
 
-### Debug Tips
+2. **Messages not received**: Check notification permissions and ensure the app is properly registered with FCM.
 
-- Check logcat for FCM-related logs
-- Verify FCM token is valid using Firebase Console
-- Test with Firebase Console's "Send test message" feature
-- Ensure app is properly signed for release builds
+3. **Build errors**: Ensure all Firebase dependencies are correctly added and the configuration files are in place.
 
-## Requirements
+### Debug Mode
 
-- Android API level 24+ (Android 7.0)
-- Kotlin 1.9.10+
-- Firebase BOM 32.3.1+
-- Google Services 4.4.0+
+Enable debug logging by setting the log level in your Tauri configuration:
 
-## License
-
-This project is open source and available under the MIT License.
+```json
+{
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "log": {
+        "all": true
+      }
+    }
+  }
+}
+```
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support, please open an issue on the GitHub repository or check the Tauri documentation.

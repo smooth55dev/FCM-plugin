@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCM Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .status {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 FCM Test App</h1>
+        
+        <div class="status">
+            <h3>📱 Status</h3>
+            <p id="status">Testing webview loading...</p>
+            <p id="context">Context: <span id="context-info">Detecting...</span></p>
+        </div>
+        
+        <div>
+            <h3>🎯 Test Functions</h3>
+            <button onclick="testBasicFunction()">Test Basic Function</button>
+            <button onclick="testTauriAPI()">Test Tauri API</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <div>
+            <h3>📋 Console Log</h3>
+            <div id="console-log" class="log">
+                <div>[INFO] FCM Test App initialized</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Basic logging function
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('console-log');
+            const entry = document.createElement('div');
+            entry.className = `log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        // Test basic functionality
+        function testBasicFunction() {
+            log('Basic function test - SUCCESS!', 'success');
+            document.getElementById('status').textContent = 'Basic functions working!';
+        }
+
+        // Test Tauri API availability
+        function testTauriAPI() {
+            if (typeof window.__TAURI__ !== 'undefined') {
+                log('Tauri API is available!', 'success');
+                document.getElementById('context-info').textContent = 'Tauri App';
+                document.getElementById('context-info').style.color = '#4caf50';
+            } else {
+                log('Tauri API not available (running in browser)', 'warning');
+                document.getElementById('context-info').textContent = 'Browser';
+                document.getElementById('context-info').style.color = '#ff9800';
+            }
+        }
+
+        // Clear log function
+        function clearLog() {
+            document.getElementById('console-log').innerHTML = '<div>[INFO] Log cleared</div>';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Page loaded successfully', 'info');
+            testTauriAPI();
+            document.getElementById('status').textContent = 'Webview is working!';
+        });
+
+        // Make functions available globally
+        window.testBasicFunction = testBasicFunction;
+        window.testTauriAPI = testTauriAPI;
+        window.clearLog = clearLog;
+    </script>
+</body>
+</html>

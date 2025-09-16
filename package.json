@@ -1,0 +1,28 @@
+{
+  "name": "fcm-example-app",
+  "version": "0.1.0",
+  "description": "FCM Plugin Example App",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "android": "tauri android dev",
+    "android:build": "tauri android build --apk",
+    "android:build:debug": "tauri android build --debug",
+    "android:build:release": "tauri android build --apk",
+    "android:init": "tauri android init",
+    "build:android": "./build-android.sh",
+    "build:android:win": "build-android.bat"
+  },
+  "keywords": [
+    "tauri",
+    "fcm",
+    "firebase",
+    "mobile"
+  ],
+  "author": "smooth55dev",
+  "license": "MIT",
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.4"
+  }
+}

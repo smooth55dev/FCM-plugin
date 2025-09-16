@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minimal Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .status {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Minimal FCM Test</h1>
+        
+        <div class="status">
+            <p><strong>Status:</strong> <span id="status">Loading...</span></p>
+            <p><strong>Context:</strong> <span id="context">Detecting...</span></p>
+        </div>
+        
+        <button onclick="testFunction()">Test Function</button>
+        <button onclick="checkTauri()">Check Tauri</button>
+        
+        <div id="log" style="background: #f5f5f5; padding: 10px; margin-top: 20px; font-family: monospace; font-size: 12px;">
+            <div>Log started...</div>
+        </div>
+    </div>
+
+    <script>
+        function log(msg) {
+            const logDiv = document.getElementById('log');
+            const div = document.createElement('div');
+            div.textContent = new Date().toLocaleTimeString() + ': ' + msg;
+            logDiv.appendChild(div);
+            console.log(msg);
+        }
+
+        function testFunction() {
+            log('Test function called - SUCCESS!');
+            document.getElementById('status').textContent = 'Working!';
+        }
+
+        function checkTauri() {
+            if (typeof window.__TAURI__ !== 'undefined') {
+                log('Tauri API available');
+                document.getElementById('context').textContent = 'Tauri App';
+                document.getElementById('context').style.color = 'green';
+            } else {
+                log('Tauri API not available (browser mode)');
+                document.getElementById('context').textContent = 'Browser';
+                document.getElementById('context').style.color = 'orange';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log('Page loaded');
+            document.getElementById('status').textContent = 'Loaded successfully!';
+            checkTauri();
+        });
+
+        // Make functions global
+        window.testFunction = testFunction;
+        window.checkTauri = checkTauri;
+    </script>
+</body>
+</html>

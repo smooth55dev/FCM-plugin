@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">FCM Example</string>
+    <string name="main_activity_title">FCM Example</string>
+</resources>

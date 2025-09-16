@@ -1,0 +1,46 @@
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# Tauri
+/src-tauri/target/
+/src-tauri/Cargo.lock
+
+# Android
+/android/.gradle/
+/android/build/
+/android/local.properties
+/android/.idea/
+/android/*.iml
+/android/app/build/
+
+# iOS
+/ios/build/
+/ios/DerivedData/
+/ios/*.xcworkspace/xcuserdata/
+/ios/*.xcodeproj/xcuserdata/
+/ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Node.js (if using frontend build tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
